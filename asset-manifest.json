@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/Trc-Website/static/css/main.5e9b936b.css",
-    "main.js": "/Trc-Website/static/js/main.329f409c.js",
+    "main.js": "/Trc-Website/static/js/main.ba859dd2.js",
     "static/media/logo.jpeg": "/Trc-Website/static/media/logo.1db9a84900f15998f1d8.jpeg",
     "index.html": "/Trc-Website/index.html",
     "main.5e9b936b.css.map": "/Trc-Website/static/css/main.5e9b936b.css.map",
-    "main.329f409c.js.map": "/Trc-Website/static/js/main.329f409c.js.map"
+    "main.ba859dd2.js.map": "/Trc-Website/static/js/main.ba859dd2.js.map"
   },
   "entrypoints": [
     "static/css/main.5e9b936b.css",
-    "static/js/main.329f409c.js"
+    "static/js/main.ba859dd2.js"
   ]
 }
