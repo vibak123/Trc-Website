@@ -8,11 +8,11 @@ function switchTab(tab) {
     const registerPanel = document.getElementById("register-panel");
 
     if (tab === "register") {
-        loginPanel.style.display = "none";
-        registerPanel.style.display = "block";
+        loginPanel.classList.add("hide");
+        registerPanel.classList.add("active");
     } else {
-        loginPanel.style.display = "block";
-        registerPanel.style.display = "none";
+        loginPanel.classList.remove("hide");
+        registerPanel.classList.remove("active");
     }
 }
 </script>
