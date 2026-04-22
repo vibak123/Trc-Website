@@ -169,3 +169,27 @@ tbody tr:last-child{border-bottom:none}
 .profile-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
 .profile-field label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
 .profile-field p{font-size:14px;color:var(--text-primary);font-weight:500}
+/* ===== AUTH PANEL FIX ===== */
+#login-panel,
+#register-panel {
+  transition: all 0.3s ease;
+}
+
+/* default visible login */
+#login-panel {
+  display: block;
+}
+
+/* hidden register */
+#register-panel {
+  display: none;
+}
+
+/* when active */
+#register-panel.active {
+  display: block;
+}
+
+#login-panel.hide {
+  display: none;
+}
