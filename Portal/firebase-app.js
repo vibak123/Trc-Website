@@ -2,7 +2,20 @@
 //  TRC FIREBASE APP  —  Replaces entire Node.js + MongoDB backend
 //  Paste YOUR Firebase config below (from Firebase Console)
 // ═══════════════════════════════════════════════════════════════════
+<script>
+function switchTab(tab) {
+    const loginPanel = document.getElementById("login-panel");
+    const registerPanel = document.getElementById("register-panel");
 
+    if (tab === "register") {
+        loginPanel.style.display = "none";
+        registerPanel.style.display = "block";
+    } else {
+        loginPanel.style.display = "block";
+        registerPanel.style.display = "none";
+    }
+}
+</script>
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
