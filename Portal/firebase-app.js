@@ -14,12 +14,12 @@ import { getStorage, ref, uploadBytes, getDownloadURL }
 // ─── PASTE YOUR FIREBASE CONFIG HERE ────────────────────────────────
 //  Firebase Console → Your Project → Project Settings → Your Apps
 const firebaseConfig = {
-  apiKey:            "YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey: "AIzaSyDfFd87JukSkB1v-jAs2bLVG-OlKNJ4w5k",
+  authDomain: "trc-portal-3b6de.firebaseapp.com",
+  projectId: "trc-portal-3b6de",
+  storageBucket: "trc-portal-3b6de.firebasestorage.app",
+  messagingSenderId: "608154775398",
+  appId: "1:608154775398:web:71a7b6d7cb7729c465a2a7"
 };
 // ─────────────────────────────────────────────────────────────────────
 
@@ -32,13 +32,14 @@ const storage = getStorage(app);
 //  1. Sign up at emailjs.com
 //  2. Create a service (Gmail) and a template
 //  3. Paste your IDs below
-const EMAILJS_SERVICE_ID  = "YOUR_SERVICE_ID";
-const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
-const EMAILJS_PUBLIC_KEY  = "YOUR_PUBLIC_KEY";
+const EMAILJS_SERVICE_ID  = "service_0lkkoln";
+const EMAILJS_TEMPLATE_SELECT = "template_pbac5qh";
+const EMAILJS_TEMPLATE_REJECT = "template_sdjbndc";
+const EMAILJS_PUBLIC_KEY  = "TquhAa9_mPr5XTMRm";
 
 // ─── ADMIN MOBILE NUMBERS (set these to your admin phones) ──────────
 //  Any mobile number in this list gets admin access after login
-const ADMIN_MOBILES = ["9999999999", "8888888888"];
+const ADMIN_MOBILES = ["9040942617"];
 
 
 // ═══════════════════════════════════════════════════════════════════
