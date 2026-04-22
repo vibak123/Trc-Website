@@ -5,52 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Techtrons Robotics Club | Portal</title>
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    body{background:var(--bg-deep);display:flex;min-height:100vh}
+    .hero-side{flex:1;background:linear-gradient(135deg,#060614 0%,#0a0a2e 50%,#050514 100%);display:flex;align-items:center;justify-content:center}
+    .form-side{width:480px;background:var(--bg-card);display:flex}
+    .form-container{padding:40px;width:100%}
+  </style>
 </head>
 
 <body>
 
-<div class="form-container">
+<div class="hero-side"></div>
 
-  <!-- Tabs -->
-  <div class="form-tabs">
-    <button onclick="switchTab('login')">Login</button>
-    <button onclick="switchTab('register')">Register</button>
+<div class="form-side">
+  <div class="form-container">
+
+    <div class="form-tabs">
+      <button onclick="switchTab('login')">Login</button>
+      <button onclick="switchTab('register')">Register</button>
+    </div>
+
+    <div id="auth-alert"></div>
+
+    <!-- LOGIN -->
+    <div id="login-panel">
+      <h2>Login</h2>
+      <form onsubmit="handleLogin(event)">
+        <input type="tel" id="login-mobile" placeholder="Mobile" required>
+        <input type="password" id="login-password" placeholder="Password" required>
+        <button type="submit" id="login-btn">Login</button>
+      </form>
+      <p>No account? 
+        <a href="javascript:void(0)" onclick="switchTab('register')">Register now</a>
+      </p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="register-panel" style="display:none;">
+      <h2>Register</h2>
+      <form onsubmit="handleRegister(event)">
+        <input type="text" id="reg-name" placeholder="Name" required>
+        <input type="text" id="reg-course" placeholder="Course" required>
+        <input type="tel" id="reg-mobile" placeholder="Mobile" required>
+        <input type="email" id="reg-email" placeholder="Email" required>
+        <input type="password" id="reg-password" placeholder="Password" required>
+        <button type="submit" id="register-btn">Register</button>
+      </form>
+      <p>Already have account? 
+        <a href="javascript:void(0)" onclick="switchTab('login')">Login</a>
+      </p>
+    </div>
+
   </div>
-
-  <div id="auth-alert"></div>
-
-  <!-- LOGIN -->
-  <div id="login-panel">
-    <h2>Login</h2>
-    <form onsubmit="handleLogin(event)">
-      <input type="tel" id="login-mobile" placeholder="Mobile" required>
-      <input type="password" id="login-password" placeholder="Password" required>
-      <button type="submit" id="login-btn">Login</button>
-    </form>
-    <p>No account? 
-      <a href="javascript:void(0)" onclick="switchTab('register')">Register</a>
-    </p>
-  </div>
-
-  <!-- REGISTER -->
-  <div id="register-panel" style="display:none;">
-    <h2>Register</h2>
-    <form onsubmit="handleRegister(event)">
-      <input type="text" id="reg-name" placeholder="Name" required>
-      <input type="text" id="reg-course" placeholder="Course" required>
-      <input type="tel" id="reg-mobile" placeholder="Mobile" required>
-      <input type="email" id="reg-email" placeholder="Email" required>
-      <input type="password" id="reg-password" placeholder="Password" required>
-      <button type="submit" id="register-btn">Register</button>
-    </form>
-    <p>Already have account? 
-      <a href="javascript:void(0)" onclick="switchTab('login')">Login</a>
-    </p>
-  </div>
-
 </div>
 
-<!-- ✅ Firebase + Logic -->
+<!-- ✅ Firebase -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -72,30 +82,31 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+
+// ✅ TAB SWITCH
 window.switchTab = (tab) => {
   document.getElementById("login-panel").style.display = tab === "login" ? "block" : "none";
   document.getElementById("register-panel").style.display = tab === "register" ? "block" : "none";
 };
 
+
+// ✅ REGISTER
 window.handleRegister = async (e) => {
   e.preventDefault();
 
-  const name = document.getElementById("reg-name").value;
-  const course = document.getElementById("reg-course").value;
-  const mobile = document.getElementById("reg-mobile").value;
-  const email = document.getElementById("reg-email").value;
-  const password = document.getElementById("reg-password").value;
+  const name = reg-name.value;
+  const course = reg-course.value;
+  const mobile = reg-mobile.value;
+  const email = reg-email.value;
+  const password = reg-password.value;
 
   try {
     const check = await getDocs(query(collection(db,"users"), where("mobile","==",mobile)));
-    if (!check.empty) {
-      alert("Mobile already exists");
-      return;
-    }
+    if (!check.empty) return alert("Mobile already exists");
 
-    const userCred = await createUserWithEmailAndPassword(auth, email, password);
+    const user = await createUserWithEmailAndPassword(auth, email, password);
 
-    await setDoc(doc(db,"users", userCred.user.uid), {
+    await setDoc(doc(db,"users", user.user.uid), {
       name, course, mobile, email
     });
 
@@ -107,19 +118,17 @@ window.handleRegister = async (e) => {
   }
 };
 
+
+// ✅ LOGIN
 window.handleLogin = async (e) => {
   e.preventDefault();
 
-  const mobile = document.getElementById("login-mobile").value;
-  const password = document.getElementById("login-password").value;
+  const mobile = login-mobile.value;
+  const password = login-password.value;
 
   try {
     const snap = await getDocs(query(collection(db,"users"), where("mobile","==",mobile)));
-
-    if (snap.empty) {
-      alert("User not found");
-      return;
-    }
+    if (snap.empty) return alert("User not found");
 
     const user = snap.docs[0].data();
 
