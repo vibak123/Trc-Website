@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRC | Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- EmailJS for sending emails without a backend -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    .admin-login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at top,rgba(124,58,237,.15) 0%,transparent 60%),var(--bg-deep);padding:20px}
+    .admin-login-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);width:100%;max-width:420px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+    .admin-login-header{background:linear-gradient(135deg,#1a0a3e,#2d0a5e);padding:36px 32px;text-align:center;border-bottom:1px solid rgba(124,58,237,.3)}
+    .admin-lock-icon{width:72px;height:72px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 16px;box-shadow:0 10px 30px rgba(124,58,237,.4)}
+    .admin-login-header h2{font-size:22px;color:#fff}.admin-login-header p{color:rgba(255,255,255,.6);font-size:13px;margin-top:4px}
+    .admin-login-body{padding:32px}
+    .student-photo-modal{width:100px;height:120px;border-radius:10px;object-fit:cover;border:2px solid var(--primary);background:var(--bg-input);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;flex-shrink:0}
+    .detail-row{display:flex;margin-bottom:12px}
+    .detail-label{width:140px;flex-shrink:0;font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding-top:2px}
+    .detail-value{font-size:14px;color:var(--text-primary)}
+    .skills-list{display:flex;flex-wrap:wrap;gap:6px}
+    .skill-tag{background:rgba(0,102,255,.1);color:var(--primary);padding:3px 10px;border-radius:20px;font-size:12px;border:1px solid rgba(0,102,255,.2)}
+    .action-btns{display:flex;gap:6px}
+    .sidebar .nav-item.active{background:rgba(124,58,237,.12);color:#a78bfa;border-color:rgba(124,58,237,.2)}
+    .sidebar .nav-item:hover{background:rgba(124,58,237,.06)}
+  </style>
+</head>
+<body>
+
+<!-- ADMIN LOGIN -->
+<div class="admin-login-page" id="login-page">
+  <div class="admin-login-box">
+    <div class="admin-login-header">
+      <div class="admin-lock-icon">🛡️</div>
+      <h2>Admin Panel</h2>
+      <p>Techtrons Robotics Club • Secure Access</p>
+    </div>
+    <div class="admin-login-body">
+      <div id="admin-alert"></div>
+      <form onsubmit="handleAdminLogin(event)">
+        <div class="form-group"><label>📱 Admin Mobile</label><input type="tel" class="form-control" id="admin-mobile" placeholder="10-digit mobile" maxlength="10" required></div>
+        <div class="form-group"><label>🔒 Password</label><input type="password" class="form-control" id="admin-password" required></div>
+        <button type="submit" class="btn btn-full btn-lg mt-2" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff" id="admin-login-btn">Access Admin Panel →</button>
+      </form>
+      <p class="text-center mt-2" style="font-size:13px;color:var(--text-muted)"><a href="index.html" style="color:var(--text-muted)">← Back to Student Portal</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="admin-app" class="app-layout" style="display:none">
+  <aside class="sidebar" id="admin-sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">🛡️</div>
+      <div><h3>Admin Panel</h3><span>TRC Management</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="adminPage('dashboard')"><span class="icon">📊</span> Dashboard</div>
+      <div class="nav-section-label">Applications</div>
+      <div class="nav-item" onclick="adminPage('all')"><span class="icon">📋</span> All Applications</div>
+      <div class="nav-item" onclick="adminPage('Applied')"><span class="icon">⏳</span> Pending Review</div>
+      <div class="nav-item" onclick="adminPage('Selected')"><span class="icon">✅</span> Selected Members</div>
+      <div class="nav-item" onclick="adminPage('Rejected')"><span class="icon">❌</span> Rejected</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)" id="admin-avatar">A</div>
+        <div class="user-details"><div class="user-name" id="admin-name">Admin</div><div class="user-role">Administrator</div></div>
+      </div>
+      <button class="btn btn-outline btn-full btn-sm mt-2" onclick="doAdminLogout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" onclick="document.getElementById('admin-sidebar').classList.toggle('open')">☰</button>
+        <span class="topbar-title" id="admin-page-title">Dashboard</span>
+      </div>
+      <span style="font-size:12px;color:var(--text-muted)" id="admin-date"></span>
+    </div>
+
+    <div class="page-content">
+      <!-- DASHBOARD -->
+      <div id="page-dashboard">
+        <div class="grid-4 mb-3">
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(0,102,255,.12)">👥</div><div class="stat-info"><div class="stat-value text-primary-color" id="st-total">-</div><div class="stat-label">Total Registered</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(124,58,237,.15)">📋</div><div class="stat-info"><div class="stat-value" style="color:#a78bfa" id="st-applied">-</div><div class="stat-label">Applications</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(16,185,129,.12)">✅</div><div class="stat-info"><div class="stat-value text-success" id="st-selected">-</div><div class="stat-label">Selected</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(239,68,68,.12)">❌</div><div class="stat-info"><div class="stat-value text-danger" id="st-rejected">-</div><div class="stat-label">Rejected</div></div></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+            <h3 style="font-size:16px">🕐 Recent Applications</h3>
+            <button class="btn btn-outline btn-sm" onclick="adminPage('all')">View All</button>
+          </div>
+          <div id="recent-table"><div style="text-align:center;padding:40px"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
+      <!-- APPLICATIONS TABLE -->
+      <div id="page-applications" style="display:none">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Search name, mobile, email..." id="app-search" oninput="filterStudents()">
+          </div>
+          <div class="filter-tabs" id="filter-tabs">
+            <button class="filter-tab active" onclick="setStatusFilter('all',this)">All</button>
+            <button class="filter-tab" onclick="setStatusFilter('Applied',this)">Applied</button>
+            <button class="filter-tab" onclick="setStatusFilter('Selected',this)">Selected</button>
+            <button class="filter-tab" onclick="setStatusFilter('Rejected',this)">Rejected</button>
+            <button class="filter-tab" onclick="setStatusFilter('Pending',this)">Pending</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-container">
+            <table><thead><tr><th>Student</th><th>Course</th><th>Year</th><th>Mobile</th><th>Applied On</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="apps-tbody"></tbody></table>
+          </div>
+          <div id="apps-count" style="font-size:13px;color:var(--text-muted);margin-top:12px;text-align:right"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STUDENT DETAIL MODAL -->
+<div class="modal-overlay" id="student-modal">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-header"><h2>📋 Student Details</h2><button class="modal-close" onclick="document.getElementById('student-modal').classList.remove('active')">✕</button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header"><h2 id="confirm-title">Confirm</h2><button class="modal-close" onclick="document.getElementById('confirm-modal').classList.remove('active')">✕</button></div>
+    <div class="modal-body">
+      <p id="confirm-msg" style="color:var(--text-secondary);font-size:14px;margin-bottom:24px"></p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" style="flex:1" onclick="document.getElementById('confirm-modal').classList.remove('active')">Cancel</button>
+        <button class="btn" style="flex:1" id="confirm-btn" onclick="executeAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, getDocs, updateDoc, collection, query, where, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ── PASTE YOUR FIREBASE CONFIG ────────────────────────────────────────
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDfFd87JukSkB1v-jAs2bLVG-OlKNJ4w5k",
+  authDomain: "trc-portal-3b6de.firebaseapp.com",
+  projectId: "trc-portal-3b6de",
+  storageBucket: "trc-portal-3b6de.firebasestorage.app",
+  messagingSenderId: "608154775398",
+  appId: "1:608154775398:web:71a7b6d7cb7729c465a2a7"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+// ── PASTE YOUR EMAILJS CONFIG ─────────────────────────────────────────
+const EMAILJS_SERVICE  = "service_0lkkoln";
+const EMAILJS_TEMPLATE_SELECT = "template_pbac5qh";
+const EMAILJS_TEMPLATE_REJECT = "template_sdjbndc";
+const EMAILJS_KEY      = "TquhAa9_mPr5XTMRm";
+// ─────────────────────────────────────────────────────────────────────
+
+const fbApp = initializeApp(firebaseConfig);
+const auth  = getAuth(fbApp);
+const db    = getFirestore(fbApp);
+
+emailjs.init(EMAILJS_KEY);
+
+let adminUser = null;
+let allStudents = [];
+let currentFilter = "all";
+let pendingAction = null;
+
+// Helpers
+const statusBadge = (s) => {
+  const m={Pending:"badge-pending",Applied:"badge-applied",Selected:"badge-selected",Rejected:"badge-rejected"};
+  return `<span class="badge ${m[s]||""}">${s}</span>`;
+};
+const fmtDate = (ts) => { if(!ts) return "N/A"; const d=ts?.seconds?new Date(ts.seconds*1000):new Date(ts); return d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}); };
+const genId = async () => {
+  const yr = new Date().getFullYear().toString().slice(-2);
+  while(true){
+    const id=`TRC${yr}${Math.floor(1000+Math.random()*9000)}`;
+    const check=await getDocs(query(collection(db,"users"),where("uniqueId","==",id)));
+    if(check.empty) return id;
+  }
+};
+const toast = (msg, type="success") => {
+  const t=document.createElement("div");
+  t.style.cssText=`position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--bg-card);border:1px solid var(--border);border-left:4px solid var(--${type==="success"?"success":"danger"});padding:14px 20px;border-radius:12px;color:var(--text-primary);font-size:14px;max-width:350px;box-shadow:0 10px 40px rgba(0,0,0,.4)`;
+  t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),4000);
+};
+
+// ── INIT ──
+document.getElementById("admin-date").textContent =
+  new Date().toLocaleDateString("en-IN",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+
+const saved = localStorage.getItem("trc_user");
+if (saved) {
+  const u = JSON.parse(saved);
+  if (u.role === "admin") { adminUser = u; showAdminApp(); }
+}
+
+window.handleAdminLogin = async (e) => {
+  e.preventDefault();
+  const mobile = document.getElementById("admin-mobile").value.trim();
+  const password = document.getElementById("admin-password").value;
+  const btn = document.getElementById("admin-login-btn");
+  document.getElementById("admin-alert").innerHTML = "";
+  btn.disabled=true; btn.dataset.orig=btn.innerHTML; btn.innerHTML=`<span class="spinner"></span> Authenticating...`;
+
+  try {
+    const snap = await getDocs(query(collection(db,"users"),where("mobile","==",mobile)));
+    if (snap.empty) throw new Error("Mobile not registered");
+    const userData = snap.docs[0].data();
+    if (userData.role !== "admin") throw new Error("You do not have admin access");
+    await signInWithEmailAndPassword(auth, userData.email, password);
+    const full = await getDoc(doc(db,"users",userData.uid));
+    adminUser = full.data();
+    localStorage.setItem("trc_user", JSON.stringify(adminUser));
+    showAdminApp();
+  } catch(err) {
+    document.getElementById("admin-alert").innerHTML = `<div class="alert alert-danger">❌ ${err.code==="auth/invalid-credential"?"Incorrect password":err.message}</div>`;
+    btn.disabled=false; btn.innerHTML=btn.dataset.orig;
+  }
+};
+
+function showAdminApp() {
+  document.getElementById("login-page").style.display = "none";
+  document.getElementById("admin-app").style.display = "flex";
+  document.getElementById("admin-name").textContent = adminUser.name;
+  document.getElementById("admin-avatar").textContent = adminUser.name[0].toUpperCase();
+  loadDashboard();
+}
+
+window.doAdminLogout = async () => {
+  await signOut(auth);
+  localStorage.removeItem("trc_user");
+  window.location.href = "index.html";
+};
+
+// ── LOAD ALL STUDENTS ──
+async function fetchStudents() {
+  const snap = await getDocs(collection(db,"users"));
+  allStudents = snap.docs.map(d=>d.data()).filter(u=>u.role==="student");
+  return allStudents;
+}
+
+// ── DASHBOARD ──
+async function loadDashboard() {
+  const students = await fetchStudents();
+  document.getElementById("st-total").textContent    = students.length;
+  document.getElementById("st-applied").textContent  = students.filter(s=>s.applicationStatus==="Applied").length;
+  document.getElementById("st-selected").textContent = students.filter(s=>s.applicationStatus==="Selected").length;
+  document.getElementById("st-rejected").textContent = students.filter(s=>s.applicationStatus==="Rejected").length;
+
+  const recent = students.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0)).slice(0,5);
+  if (!recent.length) { document.getElementById("recent-table").innerHTML=`<p style="color:var(--text-muted);text-align:center;padding:40px">No applications yet</p>`; return; }
+  document.getElementById("recent-table").innerHTML = `
+    <div class="table-container"><table>
+      <thead><tr><th>Student</th><th>Course</th><th>Status</th><th>Joined</th></tr></thead>
+      <tbody>${recent.map(s=>`<tr>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          ${s.detailedProfile?.photoUrl?`<img src="${s.detailedProfile.photoUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">`:`<div class="avatar">${s.name[0]}</div>`}
+          <div style="font-weight:600;font-size:14px">${s.name}</div></div></td>
+        <td style="font-size:13px;color:var(--text-secondary)">${s.course}</td>
+        <td>${statusBadge(s.applicationStatus)}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${fmtDate(s.createdAt)}</td>
+      </tr>`).join("")}</tbody>
+    </table></div>`;
+}
+
+// ── PAGE NAV ──
+window.adminPage = async (page) => {
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  const navItems = document.querySelectorAll(".nav-item");
+  const map={dashboard:0,all:1,Applied:2,Selected:3,Rejected:4};
+  if(map[page]!==undefined) navItems[map[page]]?.classList.add("active");
+
+  document.getElementById("admin-page-title").textContent =
+    {dashboard:"Dashboard",all:"All Applications",Applied:"Pending Review",Selected:"Selected Members",Rejected:"Rejected"}[page]||page;
+
+  if (page === "dashboard") {
+    document.getElementById("page-dashboard").style.display = "block";
+    document.getElementById("page-applications").style.display = "none";
+  } else {
+    document.getElementById("page-dashboard").style.display = "none";
+    document.getElementById("page-applications").style.display = "block";
+    currentFilter = page;
+    // Reset filter tabs
+    document.querySelectorAll(".filter-tab").forEach(t=>t.classList.toggle("active", t.textContent===page||(page==="all"&&t.textContent==="All")));
+    await fetchStudents();
+    renderTable();
+  }
+  document.getElementById("admin-sidebar").classList.remove("open");
+};
+
+// ── TABLE RENDER ──
+function renderTable() {
+  const search = document.getElementById("app-search")?.value.toLowerCase()||"";
+  let filtered = allStudents;
+  if (currentFilter !== "all") filtered = filtered.filter(s=>s.applicationStatus===currentFilter);
+  if (search) filtered = filtered.filter(s=>
+    s.name?.toLowerCase().includes(search)||s.mobile?.includes(search)||s.email?.toLowerCase().includes(search)||s.course?.toLowerCase().includes(search));
+  filtered.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+
+  document.getElementById("apps-count").textContent = `Showing ${filtered.length} student${filtered.length!==1?"s":""}`;
+
+  if (!filtered.length) {
+    document.getElementById("apps-tbody").innerHTML = `<tr><td colspan="7" style="text-align:center;padding:60px;color:var(--text-muted)">No students found</td></tr>`;
+    return;
+  }
+
+  document.getElementById("apps-tbody").innerHTML = filtered.map(s=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px">
+        ${s.detailedProfile?.photoUrl?`<img src="${s.detailedProfile.photoUrl}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--border)">`:`<div class="avatar">${s.name[0]}</div>`}
+        <div><div style="font-weight:600;font-size:14px">${s.name}</div><div style="font-size:12px;color:var(--text-muted)">${s.email}</div></div>
+      </div></td>
+      <td style="font-size:13px;color:var(--text-secondary)">${s.course}</td>
+      <td style="font-size:13px;color:var(--text-secondary)">${s.year}</td>
+      <td style="font-size:13px;font-family:monospace">${s.mobile}</td>
+      <td style="font-size:12px;color:var(--text-muted)">${fmtDate(s.createdAt)}</td>
+      <td>${statusBadge(s.applicationStatus)}</td>
+      <td><div class="action-btns">
+        <button class="btn btn-outline btn-sm" onclick="viewStudent('${s.uid}')">👁 View</button>
+        ${s.applicationStatus==="Applied"?`
+          <button class="btn btn-success btn-sm" onclick="confirmAction('${s.uid}','select','${s.name.replace(/'/g,"\\'")}')">✅ Select</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmAction('${s.uid}','reject','${s.name.replace(/'/g,"\\'")}')">❌ Reject</button>`:""}
+        ${s.applicationStatus==="Selected"?`<span style="font-size:12px;color:var(--success)">✅ Selected</span>`:""}
+        ${s.applicationStatus==="Rejected"?`<span style="font-size:12px;color:var(--danger)">❌ Rejected</span>`:""}
+      </div></td>
+    </tr>`).join("");
+}
+
+window.setStatusFilter = (f, btn) => {
+  currentFilter = f;
+  document.querySelectorAll(".filter-tab").forEach(t=>t.classList.remove("active"));
+  btn.classList.add("active");
+  renderTable();
+};
+window.filterStudents = () => renderTable();
+
+// ── VIEW STUDENT ──
+window.viewStudent = async (uid) => {
+  document.getElementById("student-modal").classList.add("active");
+  document.getElementById("modal-body").innerHTML = `<div style="text-align:center;padding:40px"><div class="spinner"></div></div>`;
+  const s = allStudents.find(x=>x.uid===uid) || (await getDoc(doc(db,"users",uid))).data();
+  const d = s.detailedProfile||{};
+  const photo = d.photoUrl;
+
+  document.getElementById("modal-body").innerHTML = `
+    <div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+      <div class="student-photo-modal">${photo?`<img src="${photo}" style="width:100%;height:100%;object-fit:cover">`:"👤"}</div>
+      <div style="flex:1">
+        <h3 style="font-size:20px;margin-bottom:4px">${s.name}</h3>
+        <p style="color:var(--text-secondary);font-size:14px;margin-bottom:12px">${s.course} • ${s.year}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+          ${statusBadge(s.applicationStatus)}
+          ${s.uniqueId?`<span class="badge badge-selected">🪪 ${s.uniqueId}</span>`:""}
+        </div>
+        ${s.applicationStatus==="Applied"?`<div style="display:flex;gap:8px">
+          <button class="btn btn-success btn-sm" onclick="document.getElementById('student-modal').classList.remove('active');confirmAction('${s.uid}','select','${s.name.replace(/'/g,"\\'")}')">✅ Select</button>
+          <button class="btn btn-danger btn-sm" onclick="document.getElementById('student-modal').classList.remove('active');confirmAction('${s.uid}','reject','${s.name.replace(/'/g,"\\'")}')">❌ Reject</button>
+        </div>`:""}
+      </div>
+    </div>
+    <div class="grid-2" style="gap:20px">
+      <div>
+        <h4 style="color:var(--primary);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Contact</h4>
+        <div class="detail-row"><span class="detail-label">Mobile</span><span class="detail-value">📱 ${s.mobile}</span></div>
+        <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">📧 ${s.email}</span></div>
+        ${d.collegeEmail?`<div class="detail-row"><span class="detail-label">College Email</span><span class="detail-value">${d.collegeEmail}</span></div>`:""}
+        <div class="detail-row"><span class="detail-label">Applied On</span><span class="detail-value">${fmtDate(s.createdAt)}</span></div>
+      </div>
+      <div>
+        <h4 style="color:var(--primary);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Personal</h4>
+        <div class="detail-row"><span class="detail-label">Father's Name</span><span class="detail-value">${d.fatherName||"N/A"}</span></div>
+        <div class="detail-row"><span class="detail-label">Gender</span><span class="detail-value">${d.gender||"N/A"}</span></div>
+        <div class="detail-row"><span class="detail-label">DOB</span><span class="detail-value">${d.dob||"N/A"}</span></div>
+        <div class="detail-row"><span class="detail-label">City / State</span><span class="detail-value">${[d.city,d.state].filter(Boolean).join(", ")||"N/A"}</span></div>
+      </div>
+      <div>
+        <h4 style="color:var(--primary);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Academic</h4>
+        <div class="detail-row"><span class="detail-label">College</span><span class="detail-value">${d.college||"N/A"}</span></div>
+        <div class="detail-row"><span class="detail-label">Department</span><span class="detail-value">${d.department||"N/A"}</span></div>
+        <div class="detail-row"><span class="detail-label">Semester</span><span class="detail-value">${d.semester||"N/A"}</span></div>
+        <div class="detail-row"><span class="detail-label">Roll No.</span><span class="detail-value">${d.rollNumber||"N/A"}</span></div>
+      </div>
+      <div>
+        <h4 style="color:var(--primary);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">Links</h4>
+        ${d.linkedIn?`<div class="detail-row"><span class="detail-label">LinkedIn</span><span class="detail-value"><a href="${d.linkedIn}" target="_blank">View Profile</a></span></div>`:""}
+        ${d.github?`<div class="detail-row"><span class="detail-label">GitHub</span><span class="detail-value"><a href="${d.github}" target="_blank">View Profile</a></span></div>`:""}
+      </div>
+    </div>
+    ${d.skills?.length?`<div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)"><h4 style="color:var(--primary);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Skills</h4><div class="skills-list">${d.skills.map(sk=>`<span class="skill-tag">${sk}</span>`).join("")}</div></div>`:""}
+    ${d.whyJoin?`<div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)"><h4 style="color:var(--primary);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Why Join TRC?</h4><p style="font-size:14px;color:var(--text-secondary);line-height:1.7;background:var(--bg-input);padding:14px;border-radius:12px">${d.whyJoin}</p></div>`:""}
+    ${d.experience?`<div style="margin-top:16px"><h4 style="color:var(--primary);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Previous Experience</h4><p style="font-size:14px;color:var(--text-secondary);line-height:1.7;background:var(--bg-input);padding:14px;border-radius:12px">${d.experience}</p></div>`:""}
+  `;
+};
+
+// ── CONFIRM ACTION ──
+window.confirmAction = (uid, action, name) => {
+  pendingAction = { uid, action };
+  document.getElementById("confirm-title").textContent = action==="select" ? "✅ Select Student" : "❌ Reject Student";
+  document.getElementById("confirm-msg").textContent = `Are you sure you want to ${action} "${name}"? ${action==="select"?"A selection email will be sent automatically.":"A rejection email will be sent."}`;
+  const btn = document.getElementById("confirm-btn");
+  btn.textContent = action==="select" ? "Yes, Select" : "Yes, Reject";
+  btn.className = `btn ${action==="select"?"btn-success":"btn-danger"}`;
+  document.getElementById("confirm-modal").classList.add("active");
+};
+
+window.executeAction = async () => {
+  if (!pendingAction) return;
+  const { uid, action } = pendingAction;
+  const btn = document.getElementById("confirm-btn");
+  btn.disabled=true; btn.dataset.orig=btn.innerHTML; btn.innerHTML=`<span class="spinner"></span> Processing...`;
+
+  try {
+    const student = allStudents.find(s=>s.uid===uid);
+
+    if (action === "select") {
+      const uniqueId = student.uniqueId || await genId();
+      await updateDoc(doc(db,"users",uid), { applicationStatus:"Selected", idCardVisible:true, uniqueId, updatedAt:serverTimestamp() });
+      // Update local cache
+      const idx = allStudents.findIndex(s=>s.uid===uid);
+      if (idx>-1) { allStudents[idx].applicationStatus="Selected"; allStudents[idx].idCardVisible=true; allStudents[idx].uniqueId=uniqueId; }
+      // Send email
+      try {
+        await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_SELECT, { to_name:student.name, to_email:student.email, unique_id:uniqueId, course:student.course, year:student.year });
+      } catch(e) { console.warn("Email error:", e); }
+      toast(`✅ ${student.name} selected! Email sent.`);
+    } else {
+      await updateDoc(doc(db,"users",uid), { applicationStatus:"Rejected", idCardVisible:false, updatedAt:serverTimestamp() });
+      const idx = allStudents.findIndex(s=>s.uid===uid);
+      if (idx>-1) allStudents[idx].applicationStatus="Rejected";
+      try {
+        await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE_REJECT, { to_name:student.name, to_email:student.email });
+      } catch(e) { console.warn("Email error:", e); }
+      toast(`${student.name} rejected.`);
+    }
+
+    document.getElementById("confirm-modal").classList.remove("active");
+    renderTable();
+    loadDashboard();
+  } catch(err) {
+    toast("Error: " + err.message, "danger");
+    btn.disabled=false; btn.innerHTML=btn.dataset.orig;
+  }
+};
+</script>
+</body>
+</html>

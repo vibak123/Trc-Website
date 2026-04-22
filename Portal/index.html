@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Techtrons Robotics Club | Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body{background:var(--bg-deep);display:flex;min-height:100vh}
+    .hero-side{flex:1;background:linear-gradient(135deg,#060614 0%,#0a0a2e 50%,#050514 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;position:relative;overflow:hidden}
+    .hero-side::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(0,102,255,.15) 0%,transparent 70%);top:-100px;left:-100px}
+    .hero-content{position:relative;z-index:1;max-width:500px}
+    .hero-logo{display:flex;align-items:center;gap:16px;margin-bottom:40px}
+    .gear-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:0 10px 30px rgba(0,102,255,.4);animation:spin-slow 12s linear infinite}
+    @keyframes spin-slow{to{transform:rotate(360deg)}}
+    .brand h1{font-size:22px;color:#fff}.brand p{font-size:13px;color:var(--text-muted)}
+    .hero-tagline{font-size:48px;font-weight:900;line-height:1.1;margin-bottom:20px}
+    .hero-tagline span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hero-desc{font-size:16px;color:var(--text-secondary);line-height:1.7;margin-bottom:40px}
+    .hero-features{display:flex;flex-direction:column;gap:14px}
+    .hero-feat{display:flex;align-items:center;gap:12px;padding:14px 18px;background:rgba(0,102,255,.06);border:1px solid rgba(0,102,255,.15);border-radius:12px}
+    .hero-feat .feat-icon{font-size:22px;flex-shrink:0}
+    .hero-feat h4{font-size:14px;color:var(--text-primary);margin-bottom:2px}
+    .hero-feat p{font-size:12px;color:var(--text-muted)}
+    .form-side{width:480px;background:var(--bg-card);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+    .form-container{padding:50px 44px;flex:1;display:flex;flex-direction:column;justify-content:center}
+    .form-tabs{display:flex;background:var(--bg-input);border-radius:var(--radius);padding:4px;margin-bottom:32px}
+    .form-tab{flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text-muted);transition:all .2s;border:none;background:transparent;font-family:var(--font)}
+    .form-tab.active{background:var(--bg-card2);color:var(--text-primary);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+    .form-header{margin-bottom:28px}
+    .form-header h2{font-size:24px;margin-bottom:6px}
+    .form-header p{color:var(--text-secondary);font-size:14px}
+    .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .admin-link-wrapper{text-align:center;padding:16px 44px;border-top:1px solid var(--border)}
+    .admin-link{font-size:13px;color:var(--text-muted)}
+    .admin-link a{color:var(--primary);font-weight:600}
+    @media(max-width:900px){body{flex-direction:column}.hero-side{padding:40px 24px}.hero-tagline{font-size:32px}.hero-features{display:none}.form-side{width:100%}.form-container{padding:32px 24px}}
+  </style>
+</head>
+<body>
+
+<div class="hero-side">
+  <div class="hero-content">
+    <div class="hero-logo">
+      <div class="gear-icon">⚙️</div>
+      <div class="brand"><h1>Techtrons</h1><p>Robotics Club</p></div>
+    </div>
+    <div class="hero-tagline">Build. Innovate.<br><span>Dominate.</span></div>
+    <p class="hero-desc">Join the premier robotics community. Compete, collaborate, and create cutting-edge technology.</p>
+    <div class="hero-features">
+      <div class="hero-feat"><span class="feat-icon">🤖</span><div><h4>Hands-on Robotics</h4><p>Build real robots, drones, and automation projects</p></div></div>
+      <div class="hero-feat"><span class="feat-icon">🏆</span><div><h4>Competitions & Events</h4><p>Represent at national & inter-college championships</p></div></div>
+      <div class="hero-feat"><span class="feat-icon">🎓</span><div><h4>Expert Mentorship</h4><p>Learn from industry professionals and alumni</p></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="form-side">
+  <div class="form-container">
+    <div class="form-tabs">
+      <button class="form-tab active" onclick="switchTab('login')">🔐 Login</button>
+      <button class="form-tab" onclick="switchTab('register')">📝 Register</button>
+    </div>
+
+    <div id="auth-alert"></div>
+
+    <!-- LOGIN -->
+    <div id="login-panel">
+      <div class="form-header"><h2>Welcome Back!</h2><p>Sign in with your mobile number and password</p></div>
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>📱 Mobile Number</label>
+          <input type="tel" class="form-control" id="login-mobile" placeholder="10-digit mobile number" maxlength="10" required>
+        </div>
+        <div class="form-group">
+          <label>🔒 Password</label>
+          <input type="password" class="form-control" id="login-password" placeholder="Your password" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg mt-2" id="login-btn">Sign In →</button>
+      </form>
+      <p class="text-center mt-2" style="color:var(--text-muted);font-size:13px">No account? <a href="#" onclick="switchTab('register')">Register now</a></p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="register-panel" class="hidden">
+      <div class="form-header"><h2>Join TRC!</h2><p>Create your account to apply for membership</p></div>
+      <form onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label>👤 Full Name</label>
+          <input type="text" class="form-control" id="reg-name" placeholder="Your full name" required>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>📚 Year</label>
+            <select class="form-control" id="reg-year" required>
+              <option value="">Select Year</option>
+              <option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>🎓 Course</label>
+            <input type="text" class="form-control" id="reg-course" placeholder="e.g. B.Tech CS" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>📱 Mobile Number</label>
+          <input type="tel" class="form-control" id="reg-mobile" placeholder="10-digit mobile" maxlength="10" required>
+        </div>
+        <div class="form-group">
+          <label>📧 Email ID</label>
+          <input type="email" class="form-control" id="reg-email" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>🔒 Password</label>
+          <input type="password" class="form-control" id="reg-password" placeholder="Min. 6 characters" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg mt-2" id="register-btn">Create Account →</button>
+      </form>
+      <p class="text-center mt-2" style="color:var(--text-muted);font-size:13px">Already registered? <a href="#" onclick="switchTab('login')">Sign in</a></p>
+    </div>
+  </div>
+  <div class="admin-link-wrapper">
+    <p class="admin-link">Admin? <a href="admin.html">Access Admin Panel →</a></p>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword }
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc, getDocs, collection, query, where, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // ─── PASTE YOUR FIREBASE CONFIG HERE ───────────────────────────────
+ // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDfFd87JukSkB1v-jAs2bLVG-OlKNJ4w5k",
+  authDomain: "trc-portal-3b6de.firebaseapp.com",
+  projectId: "trc-portal-3b6de",
+  storageBucket: "trc-portal-3b6de.firebasestorage.app",
+  messagingSenderId: "608154775398",
+  appId: "1:608154775398:web:71a7b6d7cb7729c465a2a7"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+  // ────────────────────────────────────────────────────────────────────
+
+  // Admin mobile numbers — these get admin role on registration
+  const ADMIN_MOBILES = ["9040942617"];
+
+  const fbApp  = initializeApp(firebaseConfig);
+  const auth   = getAuth(fbApp);
+  const db     = getFirestore(fbApp);
+
+  // Redirect if already logged in
+  const saved = localStorage.getItem("trc_user");
+  if (saved) {
+    const u = JSON.parse(saved);
+    window.location.href = u.role === "admin" ? "admin.html" : "student.html";
+  }
+
+  window.switchTab = (tab) => {
+    document.getElementById("auth-alert").innerHTML = "";
+    document.querySelectorAll(".form-tab").forEach((t,i) =>
+      t.classList.toggle("active", (tab==="login"&&i===0)||(tab==="register"&&i===1)));
+    document.getElementById("login-panel").classList.toggle("hidden", tab!=="login");
+    document.getElementById("register-panel").classList.toggle("hidden", tab!=="register");
+  };
+
+  const showAlert = (msg, type="danger") => {
+    const icons = {success:"✅",danger:"❌",warning:"⚠️"};
+    document.getElementById("auth-alert").innerHTML =
+      `<div class="alert alert-${type}"><span>${icons[type]||"ℹ️"}</span><span>${msg}</span></div>`;
+  };
+
+  const setLoading = (id, on, text) => {
+    const btn = document.getElementById(id);
+    if (on) { btn.disabled=true; btn.dataset.orig=btn.innerHTML; btn.innerHTML=`<span class="spinner"></span> ${text}`; }
+    else { btn.disabled=false; btn.innerHTML=btn.dataset.orig; }
+  };
+
+  window.handleLogin = async (e) => {
+    e.preventDefault();
+    const mobile   = document.getElementById("login-mobile").value.trim();
+    const password = document.getElementById("login-password").value;
+    document.getElementById("auth-alert").innerHTML = "";
+    setLoading("login-btn", true, "Signing in...");
+    try {
+      // Look up email by mobile
+      const snap = await getDocs(query(collection(db,"users"), where("mobile","==",mobile)));
+      if (snap.empty) throw new Error("Mobile number not registered");
+      const userData = snap.docs[0].data();
+      await signInWithEmailAndPassword(auth, userData.email, password);
+      const fullSnap = await getDoc(doc(db,"users", userData.uid));
+      const user = fullSnap.data();
+      localStorage.setItem("trc_user", JSON.stringify(user));
+      showAlert("Login successful! Redirecting...", "success");
+      setTimeout(() => { window.location.href = user.role==="admin" ? "admin.html" : "student.html"; }, 700);
+    } catch(err) {
+      showAlert(err.code==="auth/wrong-password"||err.code==="auth/invalid-credential"
+        ? "Incorrect password" : err.message);
+      setLoading("login-btn", false);
+    }
+  };
+
+  window.handleRegister = async (e) => {
+    e.preventDefault();
+    const name     = document.getElementById("reg-name").value.trim();
+    const year     = document.getElementById("reg-year").value;
+    const course   = document.getElementById("reg-course").value.trim();
+    const mobile   = document.getElementById("reg-mobile").value.trim();
+    const email    = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
+    document.getElementById("auth-alert").innerHTML = "";
+
+    if (!/^[6-9]\d{9}$/.test(mobile))
+      return showAlert("Enter a valid 10-digit Indian mobile number", "warning");
+
+    setLoading("register-btn", true, "Creating account...");
+    try {
+      // Check mobile uniqueness
+      const mSnap = await getDocs(query(collection(db,"users"), where("mobile","==",mobile)));
+      if (!mSnap.empty) throw new Error("Mobile number already registered");
+
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const uid  = cred.user.uid;
+      const role = ADMIN_MOBILES.includes(mobile) ? "admin" : "student";
+      const user = { uid, name, year, course, mobile, email, role,
+        applicationStatus:"Pending", isFirstLogin:true, isProfileComplete:false,
+        idCardVisible:false, uniqueId:null, createdAt:serverTimestamp(), updatedAt:serverTimestamp() };
+      await setDoc(doc(db,"users",uid), user);
+      localStorage.setItem("trc_user", JSON.stringify({ ...user, createdAt: new Date().toISOString() }));
+      showAlert("Account created! Redirecting...", "success");
+      setTimeout(() => { window.location.href = role==="admin" ? "admin.html" : "student.html"; }, 900);
+    } catch(err) {
+      showAlert(err.code==="auth/email-already-in-use" ? "Email already registered" : err.message);
+      setLoading("register-btn", false);
+    }
+  };
+</script>
+</body>
+</html>

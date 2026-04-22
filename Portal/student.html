@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRC | Student Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .app-form-overlay{position:fixed;inset:0;background:rgba(6,6,20,.9);backdrop-filter:blur(10px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+    .app-form-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);width:100%;max-width:800px;max-height:92vh;overflow-y:auto;animation:fadeInUp .4s ease}
+    .app-form-header{background:linear-gradient(135deg,var(--primary),var(--accent));padding:28px 32px;border-radius:var(--radius-xl) var(--radius-xl) 0 0}
+    .app-form-header h2{font-size:22px;color:#fff}
+    .app-form-header p{color:rgba(255,255,255,.8);font-size:14px;margin-top:4px}
+    .app-form-body{padding:32px}
+    .welcome-banner::before{content:'';position:absolute;right:-30px;top:-30px;width:200px;height:200px;background:radial-gradient(circle,rgba(0,212,255,.1),transparent)}
+    .welcome-text h2{font-size:22px;margin-bottom:4px}
+    .welcome-text p{color:var(--text-secondary);font-size:14px}
+  </style>
+</head>
+<body>
+
+<!-- Application Form Overlay -->
+<div class="app-form-overlay" id="app-form-overlay" style="display:none">
+  <div class="app-form-box">
+    <div class="app-form-header">
+      <h2>📋 Complete Your Application</h2>
+      <p>Fill in your details to apply for TRC membership. One-time form.</p>
+    </div>
+    <div class="app-form-body">
+      <div id="app-form-alert"></div>
+      <form id="application-form" onsubmit="submitApplication(event)">
+        <div class="section-divider"><h3>👤 Personal Information</h3></div>
+        <div class="grid-2">
+          <div class="form-group"><label>Full Name *</label><input type="text" class="form-control" id="f-fullName" required></div>
+          <div class="form-group"><label>Father's Name *</label><input type="text" class="form-control" id="f-fatherName" required></div>
+          <div class="form-group"><label>Date of Birth *</label><input type="date" class="form-control" id="f-dob" required></div>
+          <div class="form-group"><label>Gender *</label>
+            <select class="form-control" id="f-gender" required>
+              <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Address *</label><input type="text" class="form-control" id="f-address" required></div>
+        <div class="grid-2">
+          <div class="form-group"><label>City *</label><input type="text" class="form-control" id="f-city" required></div>
+          <div class="form-group"><label>State *</label><input type="text" class="form-control" id="f-state" required></div>
+          <div class="form-group"><label>Pincode *</label><input type="text" class="form-control" id="f-pincode" maxlength="6" required></div>
+        </div>
+        <div class="section-divider"><h3>🎓 Academic Information</h3></div>
+        <div class="grid-2">
+          <div class="form-group"><label>College Name *</label><input type="text" class="form-control" id="f-college" required></div>
+          <div class="form-group"><label>Department *</label><input type="text" class="form-control" id="f-department" required></div>
+          <div class="form-group"><label>Current Semester *</label>
+            <select class="form-control" id="f-semester" required>
+              <option value="">Select</option>
+              <option>1st Semester</option><option>2nd Semester</option><option>3rd Semester</option>
+              <option>4th Semester</option><option>5th Semester</option><option>6th Semester</option>
+              <option>7th Semester</option><option>8th Semester</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Roll Number *</label><input type="text" class="form-control" id="f-rollNumber" required></div>
+          <div class="form-group"><label>College Email</label><input type="email" class="form-control" id="f-collegeEmail" placeholder="optional"></div>
+        </div>
+        <div class="section-divider"><h3>💡 Skills & Interests</h3></div>
+        <div class="form-group"><label>Technical Skills * <small style="color:var(--text-muted);font-weight:400;text-transform:none">(comma separated)</small></label>
+          <input type="text" class="form-control" id="f-skills" placeholder="Arduino, Python, CAD Design..." required></div>
+        <div class="form-group"><label>Why do you want to join TRC? *</label>
+          <textarea class="form-control" id="f-whyJoin" rows="4" placeholder="Your motivation, goals..." required></textarea></div>
+        <div class="form-group"><label>Previous Experience</label>
+          <textarea class="form-control" id="f-experience" rows="3" placeholder="Projects, competitions..."></textarea></div>
+        <div class="grid-2">
+          <div class="form-group"><label>LinkedIn</label><input type="url" class="form-control" id="f-linkedIn" placeholder="https://linkedin.com/in/..."></div>
+          <div class="form-group"><label>GitHub</label><input type="url" class="form-control" id="f-github" placeholder="https://github.com/..."></div>
+        </div>
+        <div class="section-divider"><h3>📸 Passport Size Photo</h3></div>
+        <div class="form-group">
+          <div class="photo-upload-area" onclick="document.getElementById('f-photo').click()">
+            <img id="photo-preview" class="photo-preview" src="" alt="" style="display:none">
+            <div id="upload-placeholder">
+              <div style="font-size:48px;margin-bottom:12px">📷</div>
+              <p style="color:var(--text-secondary);font-size:14px;font-weight:600">Click to upload passport size photo</p>
+              <p style="color:var(--text-muted);font-size:12px;margin-top:4px">JPG, PNG • Max 2MB • Face visible</p>
+            </div>
+            <input type="file" id="f-photo" accept="image/*" style="display:none" onchange="previewPhoto(event)">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg mt-2" id="submit-app-btn">🚀 Submit Application</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚙️</div>
+      <div><h3>Techtrons</h3><span>Robotics Club</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard')"><span class="icon">🏠</span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('profile')"><span class="icon">👤</span> My Profile</div>
+      <div class="nav-item" onclick="showPage('status')"><span class="icon">📊</span> Application Status</div>
+      <div class="nav-section-label">Club</div>
+      <div class="nav-item" onclick="showPage('events')"><span class="icon">🗓️</span> Events</div>
+      <div class="nav-item" onclick="showPage('notices')"><span class="icon">📢</span> Notices<span class="badge-dot"></span></div>
+      <div class="nav-item" id="idcard-nav" onclick="showPage('idcard')" style="display:none"><span class="icon">🪪</span> Digital ID Card</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar" id="sidebar-avatar">U</div>
+        <div class="user-details">
+          <div class="user-name" id="sidebar-name">Student</div>
+          <div class="user-role">Student Member</div>
+        </div>
+      </div>
+      <button class="btn btn-outline btn-full btn-sm mt-2" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <span class="topbar-title" id="page-title">Dashboard</span>
+      </div>
+      <div style="font-size:13px;color:var(--text-muted)" id="topbar-date"></div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page">
+        <div class="welcome-banner">
+          <div class="avatar avatar-lg" id="welcome-avatar">U</div>
+          <div class="welcome-text">
+            <h2>Welcome back, <span class="text-accent" id="welcome-name">Student</span>! 👋</h2>
+            <p>Here's your TRC membership overview.</p>
+          </div>
+          <div style="margin-left:auto;flex-shrink:0" id="welcome-status-badge"></div>
+        </div>
+        <div class="grid-4 mb-3">
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(0,102,255,.12)">📊</div><div class="stat-info"><div class="stat-value text-primary-color" id="stat-status-short">-</div><div class="stat-label">Application Status</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(0,212,255,.12)">🗓️</div><div class="stat-info"><div class="stat-value text-accent">4</div><div class="stat-label">Upcoming Events</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(16,185,129,.12)">📢</div><div class="stat-info"><div class="stat-value text-success">3</div><div class="stat-label">Active Notices</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:rgba(124,58,237,.12)">🪪</div><div class="stat-info"><div class="stat-value" id="stat-idcard" style="font-size:16px;color:var(--text-muted)">Locked</div><div class="stat-label">Digital ID Card</div></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="font-size:16px">🗓️ Upcoming Events</h3><button class="btn btn-outline btn-sm" onclick="showPage('events')">View All</button></div><div id="dash-events" style="display:flex;flex-direction:column;gap:12px"><div class="spinner"></div></div></div>
+          <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="font-size:16px">📢 Latest Notices</h3><button class="btn btn-outline btn-sm" onclick="showPage('notices')">View All</button></div><div id="dash-notices" style="display:flex;flex-direction:column;gap:10px"><div class="spinner"></div></div></div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="page-profile" class="page hidden"><div id="profile-content"><div style="text-align:center;padding:60px"><div class="spinner"></div></div></div></div>
+
+      <!-- STATUS -->
+      <div id="page-status" class="page hidden">
+        <div class="card mb-3">
+          <h3 style="margin-bottom:4px">📊 Application Status</h3>
+          <p style="color:var(--text-secondary);font-size:14px">Track your TRC membership application</p>
+          <div class="status-timeline" id="status-timeline"></div>
+        </div>
+        <div class="card" id="status-detail-card"><div id="status-detail-content"></div></div>
+      </div>
+
+      <!-- EVENTS -->
+      <div id="page-events" class="page hidden">
+        <div style="margin-bottom:20px"><h2>🗓️ Club Events</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:4px">All TRC activities and competitions</p></div>
+        <div id="events-list" style="display:flex;flex-direction:column;gap:14px"></div>
+      </div>
+
+      <!-- NOTICES -->
+      <div id="page-notices" class="page hidden">
+        <div style="margin-bottom:20px"><h2>📢 Notices</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:4px">Important updates from club administration</p></div>
+        <div id="notices-list" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
+
+      <!-- ID CARD -->
+      <div id="page-idcard" class="page hidden">
+        <div style="margin-bottom:20px"><h2>🪪 Digital ID Card</h2><p style="color:var(--text-secondary);font-size:14px;margin-top:4px">Official Techtrons Robotics Club membership card</p></div>
+        <div id="idcard-content"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+// ── PASTE YOUR FIREBASE CONFIG HERE ──────────────────────────────────
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDfFd87JukSkB1v-jAs2bLVG-OlKNJ4w5k",
+  authDomain: "trc-portal-3b6de.firebaseapp.com",
+  projectId: "trc-portal-3b6de",
+  storageBucket: "trc-portal-3b6de.firebasestorage.app",
+  messagingSenderId: "608154775398",
+  appId: "1:608154775398:web:71a7b6d7cb7729c465a2a7"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+// ─────────────────────────────────────────────────────────────────────
+
+const fbApp   = initializeApp(firebaseConfig);
+const auth    = getAuth(fbApp);
+const db      = getFirestore(fbApp);
+const storage = getStorage(fbApp);
+
+let currentUser = null;
+
+// ── INIT ──
+const saved = localStorage.getItem("trc_user");
+if (!saved) { window.location.href = "index.html"; }
+else {
+  currentUser = JSON.parse(saved);
+  if (currentUser.role === "admin") { window.location.href = "admin.html"; }
+  init();
+}
+
+async function init() {
+  document.getElementById("topbar-date").textContent =
+    new Date().toLocaleDateString("en-IN",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});
+  document.getElementById("sidebar-name").textContent = currentUser.name;
+  document.getElementById("sidebar-avatar").textContent = currentUser.name[0].toUpperCase();
+
+  // Refresh from Firestore
+  try {
+    const snap = await getDoc(doc(db, "users", currentUser.uid));
+    if (snap.exists()) {
+      currentUser = snap.data();
+      localStorage.setItem("trc_user", JSON.stringify(currentUser));
+    }
+  } catch(e) {}
+
+  if (currentUser.idCardVisible) {
+    document.getElementById("idcard-nav").style.display = "flex";
+    document.getElementById("stat-idcard").textContent = "Active";
+    document.getElementById("stat-idcard").style.color = "var(--success)";
+  }
+
+  if (currentUser.isFirstLogin || currentUser.applicationStatus === "Pending") {
+    document.getElementById("f-fullName").value = currentUser.name || "";
+    document.getElementById("app-form-overlay").style.display = "flex";
+  }
+
+  loadDashboard();
+}
+
+// ── LOGOUT ──
+window.doLogout = async () => {
+  await signOut(auth);
+  localStorage.removeItem("trc_user");
+  window.location.href = "index.html";
+};
+
+// ── PHOTO PREVIEW ──
+window.previewPhoto = (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    document.getElementById("photo-preview").src = ev.target.result;
+    document.getElementById("photo-preview").style.display = "block";
+    document.getElementById("upload-placeholder").style.display = "none";
+  };
+  reader.readAsDataURL(file);
+};
+
+// ── SUBMIT APPLICATION ──
+window.submitApplication = async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById("submit-app-btn");
+  const alertEl = document.getElementById("app-form-alert");
+  alertEl.innerHTML = "";
+  const why = document.getElementById("f-whyJoin").value.trim();
+  if (why.split(/\s+/).length < 20) {
+    alertEl.innerHTML = `<div class="alert alert-warning">⚠️ Please write more in the "Why join" field</div>`;
+    return;
+  }
+  btn.disabled = true; btn.dataset.orig = btn.innerHTML;
+  btn.innerHTML = `<span class="spinner"></span> Submitting...`;
+
+  try {
+    let photoUrl = null;
+const photoFile = document.getElementById("f-photo").files[0];
+if (photoFile) {
+  const formData = new FormData();
+  formData.append("image", photoFile);
+  formData.append("key", "YOUR_IMGBB_API_KEY"); // paste your key here
+  const res = await fetch("https://api.imgbb.com/1/upload", {
+    method: "POST", body: formData
+  });
+  const json = await res.json();
+  if (!json.success) throw new Error("Photo upload failed");
+  photoUrl = json.data.url;
+}
+
+    const profile = {
+      fullName:     document.getElementById("f-fullName").value.trim(),
+      fatherName:   document.getElementById("f-fatherName").value.trim(),
+      dob:          document.getElementById("f-dob").value,
+      gender:       document.getElementById("f-gender").value,
+      address:      document.getElementById("f-address").value.trim(),
+      city:         document.getElementById("f-city").value.trim(),
+      state:        document.getElementById("f-state").value.trim(),
+      pincode:      document.getElementById("f-pincode").value.trim(),
+      college:      document.getElementById("f-college").value.trim(),
+      department:   document.getElementById("f-department").value.trim(),
+      semester:     document.getElementById("f-semester").value,
+      rollNumber:   document.getElementById("f-rollNumber").value.trim(),
+      collegeEmail: document.getElementById("f-collegeEmail").value.trim(),
+      skills:       document.getElementById("f-skills").value.split(",").map(s=>s.trim()).filter(Boolean),
+      whyJoin:      why,
+      experience:   document.getElementById("f-experience").value.trim(),
+      linkedIn:     document.getElementById("f-linkedIn").value.trim(),
+      github:       document.getElementById("f-github").value.trim(),
+      photoUrl,
+      submittedAt:  serverTimestamp()
+    };
+
+    await updateDoc(doc(db,"users",currentUser.uid), {
+      detailedProfile: profile,
+      applicationStatus: "Applied",
+      isFirstLogin: false,
+      isProfileComplete: true,
+      updatedAt: serverTimestamp()
+    });
+
+    currentUser.applicationStatus = "Applied";
+    currentUser.isFirstLogin = false;
+    currentUser.isProfileComplete = true;
+    currentUser.detailedProfile = profile;
+    localStorage.setItem("trc_user", JSON.stringify(currentUser));
+
+    alertEl.innerHTML = `<div class="alert alert-success">🎉 Application submitted! We'll notify you via email.</div>`;
+    setTimeout(() => {
+      document.getElementById("app-form-overlay").style.display = "none";
+      document.getElementById("stat-status-short").textContent = "Applied";
+      document.getElementById("welcome-status-badge").innerHTML = statusBadge("Applied");
+    }, 2000);
+  } catch(err) {
+    alertEl.innerHTML = `<div class="alert alert-danger">❌ ${err.message}</div>`;
+    btn.disabled = false; btn.innerHTML = btn.dataset.orig;
+  }
+};
+
+// ── PAGE NAV ──
+window.showPage = (page) => {
+  document.querySelectorAll(".page").forEach(p => p.classList.add("hidden"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById(`page-${page}`).classList.remove("hidden");
+  const navMap={dashboard:0,profile:1,status:2,events:3,notices:4,idcard:5};
+  document.querySelectorAll(".nav-item")[navMap[page]]?.classList.add("active");
+  const titles={dashboard:"Dashboard",profile:"My Profile",status:"Application Status",events:"Events",notices:"Notices",idcard:"Digital ID Card"};
+  document.getElementById("page-title").textContent = titles[page]||page;
+  if (page==="events") loadEvents();
+  if (page==="notices") loadNotices();
+  if (page==="status") loadStatus();
+  if (page==="profile") loadProfile();
+  if (page==="idcard") loadIdCard();
+  document.getElementById("sidebar").classList.remove("open");
+};
+
+// ── HELPERS ──
+const statusBadge = (s) => {
+  const m={Pending:"badge-pending",Applied:"badge-applied",Selected:"badge-selected",Rejected:"badge-rejected"};
+  return `<span class="badge ${m[s]||""}">${s}</span>`;
+};
+const fmtDate = (d) => { if(!d) return "N/A"; return new Date(d).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}); };
+
+const EVENTS = [
+  {id:1,title:"Robotics Workshop: Arduino Basics",date:"2025-02-15",time:"10:00 AM",venue:"Lab 301",type:"Workshop",status:"upcoming",description:"Learn Arduino programming and build your first robot!"},
+  {id:2,title:"Inter-College Robotics Championship",date:"2025-03-01",time:"9:00 AM",venue:"College Auditorium",type:"Competition",status:"upcoming",description:"Compete with 20+ colleges for exciting prizes!"},
+  {id:3,title:"Drone Racing Event",date:"2025-01-20",time:"2:00 PM",venue:"College Ground",type:"Competition",status:"completed",description:"Annual drone racing. Congratulations to participants!"},
+  {id:4,title:"AI & ML in Robotics Seminar",date:"2025-02-28",time:"11:00 AM",venue:"Seminar Hall A",type:"Seminar",status:"upcoming",description:"Industry experts on AI-powered robotics."}
+];
+const NOTICES = [
+  {id:1,title:"New Batch Recruitment Open",content:"Accepting applications for 2025 batch. Register and fill the form. Selection results in 2 weeks.",date:"2025-01-15",type:"important",author:"Club Admin"},
+  {id:2,title:"Workshop Registration Deadline",content:"Last date for Arduino Basics workshop: February 10, 2025. Limited seats.",date:"2025-01-18",type:"warning",author:"Events Team"},
+  {id:3,title:"Club Meeting — Every Saturday",content:"Weekly meetings at 4:00 PM in Lab 301. All selected members expected.",date:"2025-01-10",type:"info",author:"Club President"}
+];
+
+// ── DASHBOARD ──
+function loadDashboard() {
+  document.getElementById("welcome-name").textContent = currentUser.name.split(" ")[0];
+  document.getElementById("welcome-avatar").textContent = currentUser.name[0].toUpperCase();
+  document.getElementById("stat-status-short").textContent = currentUser.applicationStatus;
+  document.getElementById("welcome-status-badge").innerHTML = statusBadge(currentUser.applicationStatus);
+
+  const upcoming = EVENTS.filter(e=>e.status==="upcoming").slice(0,3);
+  document.getElementById("dash-events").innerHTML = upcoming.map(ev => {
+    const d = new Date(ev.date);
+    return `<div class="event-card">
+      <div class="event-date-box"><div class="day">${d.getDate()}</div><div class="month">${d.toLocaleDateString("en",{month:"short"})}</div></div>
+      <div style="flex:1"><span class="event-type-badge type-${ev.type.toLowerCase()}">${ev.type}</span>
+      <div style="font-weight:600;font-size:14px">${ev.title}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px">🕐 ${ev.time} • 📍 ${ev.venue}</div></div></div>`;
+  }).join("");
+
+  document.getElementById("dash-notices").innerHTML = NOTICES.slice(0,3).map(n =>
+    `<div class="notice-card type-${n.type}" style="padding:12px 16px">
+      <div style="font-size:13px;font-weight:600;margin-bottom:4px">${n.title}</div>
+      <div style="font-size:12px;color:var(--text-muted)">${n.content.substring(0,80)}...</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px">📅 ${fmtDate(n.date)} • ${n.author}</div>
+    </div>`).join("");
+}
+
+function loadEvents() {
+  document.getElementById("events-list").innerHTML = EVENTS.map(ev => {
+    const d = new Date(ev.date);
+    return `<div class="event-card animate-in">
+      <div class="event-date-box"><div class="day">${d.getDate()}</div><div class="month">${d.toLocaleDateString("en",{month:"short"})}</div></div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span class="event-type-badge type-${ev.type.toLowerCase()}">${ev.type}</span>
+          ${ev.status==="completed"?'<span class="badge badge-rejected" style="font-size:10px">Completed</span>':'<span class="badge badge-applied" style="font-size:10px">Upcoming</span>'}
+        </div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:4px">${ev.title}</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">🕐 ${ev.time} | 📍 ${ev.venue}</div>
+        <div style="font-size:13px;color:var(--text-secondary)">${ev.description}</div>
+      </div></div>`;
+  }).join("");
+}
+
+function loadNotices() {
+  const icons={important:"🔴",warning:"⚠️",info:"ℹ️"};
+  document.getElementById("notices-list").innerHTML = NOTICES.map(n =>
+    `<div class="notice-card type-${n.type} animate-in">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <span style="font-size:20px;flex-shrink:0">${icons[n.type]||"📌"}</span>
+        <div style="flex:1">
+          <div style="font-size:15px;font-weight:700;margin-bottom:6px">${n.title}</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">${n.content}</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:10px">📅 ${fmtDate(n.date)} | 👤 ${n.author}</div>
+        </div></div></div>`).join("");
+}
+
+function loadStatus() {
+  const order = ["Pending","Applied","Selected"];
+  const status = currentUser.applicationStatus;
+  const idx = order.indexOf(status);
+  const steps = [{key:"Pending",icon:"📝",label:"Registered"},{key:"Applied",icon:"📋",label:"Applied"},{key:"Selected",icon:"✅",label:"Selected"}];
+
+  if (status === "Rejected") {
+    document.getElementById("status-timeline").innerHTML = `<div style="text-align:center;width:100%;padding:20px"><div style="font-size:64px;margin-bottom:16px">❌</div><h3 style="color:var(--danger)">Application Rejected</h3><p style="color:var(--text-secondary);font-size:14px;margin-top:8px">Not selected this round. Keep building skills and try again!</p></div>`;
+  } else {
+    document.getElementById("status-timeline").innerHTML = steps.map((s,i) => {
+      const done=i<idx, active=i===idx;
+      return `<div class="timeline-step"><div class="step-dot ${done?"done":active?"active":""}">${done?"✓":s.icon}</div><div class="step-label ${done?"done":active?"active":""}">${s.label}</div></div>`;
+    }).join("");
+  }
+
+  const msgs = {
+    Pending:  {icon:"📝",title:"Registration Complete",msg:"You registered! Please complete the detailed application form.",action:`<button class="btn btn-primary" onclick="document.getElementById('app-form-overlay').style.display='flex'">Complete Application →</button>`},
+    Applied:  {icon:"⏳",title:"Application Under Review",msg:"Your application is being reviewed. We'll notify you by email. This typically takes 1-2 weeks."},
+    Selected: {icon:"🎉",title:"Congratulations! You are Selected!",msg:"You've been officially selected! Your Digital ID Card is now active.",action:`<button class="btn btn-success" onclick="showPage('idcard')">View ID Card →</button>`},
+    Rejected: {icon:"😔",title:"Not Selected",msg:"Your application was not selected this round. We encourage you to apply again next cycle."}
+  };
+  const m = msgs[status]||msgs.Pending;
+  document.getElementById("status-detail-content").innerHTML = `<div style="text-align:center;padding:20px 0"><div style="font-size:52px;margin-bottom:16px">${m.icon}</div><h3 style="font-size:20px;margin-bottom:12px">${m.title}</h3><p style="color:var(--text-secondary);font-size:14px;max-width:500px;margin:0 auto;line-height:1.7">${m.msg}</p>${m.action?`<div style="margin-top:20px">${m.action}</div>`:""}</div>`;
+}
+
+function loadProfile() {
+  const u = currentUser;
+  const d = u.detailedProfile||{};
+  const photo = d.photoUrl;
+  document.getElementById("profile-content").innerHTML = `
+    <div class="profile-header">
+      <div class="avatar avatar-xl">${photo?`<img src="${photo}" alt="${u.name}">`:`${u.name[0]}`}</div>
+      <div>
+        <h2>${u.name}</h2>
+        <p>${u.course} • ${u.year}</p>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          ${statusBadge(u.applicationStatus)}
+          ${u.uniqueId?`<span class="badge badge-selected">🪪 ${u.uniqueId}</span>`:""}
+        </div>
+      </div>
+    </div>
+    <div class="profile-field-group">
+      <h4>📞 Contact</h4>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Mobile</label><p>📱 ${u.mobile}</p></div>
+        <div class="profile-field"><label>Email</label><p>📧 ${u.email}</p></div>
+        ${d.collegeEmail?`<div class="profile-field"><label>College Email</label><p>${d.collegeEmail}</p></div>`:""}
+      </div>
+    </div>
+    ${u.isProfileComplete?`
+    <div class="profile-field-group">
+      <h4>👤 Personal</h4>
+      <div class="profile-fields">
+        <div class="profile-field"><label>Full Name</label><p>${d.fullName||u.name}</p></div>
+        <div class="profile-field"><label>Father's Name</label><p>${d.fatherName||"N/A"}</p></div>
+        <div class="profile-field"><label>DOB</label><p>${fmtDate(d.dob)}</p></div>
+        <div class="profile-field"><label>Gender</label><p>${d.gender||"N/A"}</p></div>
+        <div class="profile-field"><label>City</label><p>${d.city||"N/A"}</p></div>
+        <div class="profile-field"><label>State</label><p>${d.state||"N/A"}</p></div>
+      </div>
+    </div>
+    <div class="profile-field-group">
+      <h4>🎓 Academic</h4>
+      <div class="profile-fields">
+        <div class="profile-field"><label>College</label><p>${d.college||"N/A"}</p></div>
+        <div class="profile-field"><label>Department</label><p>${d.department||"N/A"}</p></div>
+        <div class="profile-field"><label>Semester</label><p>${d.semester||"N/A"}</p></div>
+        <div class="profile-field"><label>Roll No.</label><p>${d.rollNumber||"N/A"}</p></div>
+      </div>
+    </div>
+    ${d.skills?.length?`<div class="profile-field-group"><h4>💡 Skills</h4><div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${d.skills.map(s=>`<span style="background:rgba(0,102,255,.12);border:1px solid rgba(0,102,255,.2);color:var(--primary);padding:4px 12px;border-radius:20px;font-size:13px">${s}</span>`).join("")}</div></div>`:""}
+    `:`<div class="alert alert-warning">⚠️ Complete your application form to fill profile. <a href="#" onclick="document.getElementById('app-form-overlay').style.display='flex'">Do it now →</a></div>`}
+  `;
+}
+
+function loadIdCard() {
+  if (!currentUser.idCardVisible) {
+    document.getElementById("idcard-content").innerHTML = `<div class="card" style="text-align:center;padding:60px"><div style="font-size:80px;margin-bottom:20px">🔒</div><h3 style="font-size:20px;margin-bottom:12px">Not Yet Available</h3><p style="color:var(--text-secondary);font-size:14px;max-width:400px;margin:0 auto">Your ID Card activates once you are selected. Check your application status!</p><button class="btn btn-primary mt-3" onclick="showPage('status')">Check Status →</button></div>`;
+    return;
+  }
+  const u = currentUser;
+  const photo = u.detailedProfile?.photoUrl;
+  const bars = Array.from({length:20},()=>`<span style="width:2px;background:rgba(0,212,255,.6);display:block;height:${10+Math.random()*20}px"></span>`).join("");
+  document.getElementById("idcard-content").innerHTML = `
+    <div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">
+      <div class="id-card-wrapper" style="flex:0 0 360px">
+        <div class="id-card-3d pulse">
+          <div class="id-card-header">
+            <span style="font-size:28px">⚙️</span>
+            <div><h4 style="color:var(--accent);font-size:14px;font-weight:700">Techtrons Robotics Club</h4><p style="font-size:11px;color:var(--text-muted)">Official Member Card</p></div>
+          </div>
+          <div class="id-card-body">
+            <div class="id-card-photo">${photo?`<img src="${photo}" alt="${u.name}" style="width:100%;height:100%;object-fit:cover">`:"👤"}</div>
+            <div class="id-card-details">
+              <div class="id-card-name">${u.name}</div>
+              <div class="id-card-course">${u.course}</div>
+              <div class="id-card-field"><div class="field-label">Department</div><div class="field-value">${u.detailedProfile?.department||u.course}</div></div>
+              <div class="id-card-field"><div class="field-label">Year</div><div class="field-value">${u.year}</div></div>
+              <div class="id-card-field"><div class="field-label">Club</div><div class="field-value" style="color:var(--accent)">TRC Member</div></div>
+            </div>
+          </div>
+          <div class="id-card-footer">
+            <div><div style="font-size:10px;color:var(--text-muted);letter-spacing:1px">MEMBER ID</div><div class="id-card-uid">${u.uniqueId}</div></div>
+            <div style="display:flex;gap:2px;align-items:flex-end;height:30px">${bars}</div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:250px">
+        <div class="card mb-2">
+          <h4 style="color:var(--primary);margin-bottom:16px">🪪 Card Details</h4>
+          ${[["Member Name",u.name],["Unique ID",`<span style="color:var(--accent);font-weight:700">${u.uniqueId}</span>`],["Course",u.course],["Status",'<span class="badge badge-selected">✅ Active Member</span>']].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted);font-size:13px">${l}</span><span style="font-size:13px">${v}</span></div>`).join("")}
+        </div>
+        <div class="alert alert-info">ℹ️ Show this during club events for verification.</div>
+        <button class="btn btn-primary btn-full" onclick="window.print()">🖨️ Print ID Card</button>
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>
